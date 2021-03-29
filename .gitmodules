@@ -1,0 +1,3 @@
+[submodule "Soft-Masked-BERT"]
+	path = Soft-Masked-BERT
+	url = https://github.com/wanglke/Soft-Masked-BERT.git
