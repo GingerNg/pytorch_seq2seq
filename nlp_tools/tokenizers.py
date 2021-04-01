@@ -14,11 +14,11 @@ import logging
 class WhitespaceTokenizer():
     """WhitespaceTokenizer with vocab."""
 
-    def __init__(self, bert_path):
+    def __init__(self, bert_path, max_len=256):
         vocab_file = bert_path + 'vocab.txt'
         self._token2id = self.load_vocab(vocab_file)
         self._id2token = {v: k for k, v in self._token2id.items()}
-        self.max_len = 256
+        self.max_len = max_len
         self.unk = 1
 
         logging.info("Build Bert vocab with size %d." % (self.vocab_size))

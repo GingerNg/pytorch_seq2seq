@@ -22,4 +22,8 @@ sighan-2015
 繁体字和简体字转换
 https://github.com/BYVoid/OpenCC
 
+sighan_raw:预处理后的数据
+https://github.com/onebula/sighan_raw
+
+
 todo

@@ -1,3 +1,6 @@
 [submodule "Soft-Masked-BERT"]
 	path = Soft-Masked-BERT
 	url = https://github.com/wanglke/Soft-Masked-BERT.git
+[submodule "sighan_raw"]
+	path = sighan_raw
+	url = https://github.com/onebula/sighan_raw.git
