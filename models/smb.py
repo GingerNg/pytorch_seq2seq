@@ -139,7 +139,7 @@ class SoftMaskedBERT(nn.Module):
             return soft_masking_coefs
 
     def soft_mask(self, input_embeddings, soft_masking_coefs, attention_mask):
-        soft_masking_coefs = self.get_attention_coefV2(soft_masking_coefs=soft_masking_coefs, attention_mask=attention_mask)
+        soft_masking_coefs = self.get_attention_coef(soft_masking_coefs=soft_masking_coefs, attention_mask=attention_mask)
 
         # print(self.bert_model.get_mask_embeddings().device)
         repeated_mask_embeddings = self.bert_model.get_mask_embeddings().unsqueeze(0).unsqueeze(0).repeat(
