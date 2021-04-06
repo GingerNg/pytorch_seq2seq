@@ -54,11 +54,13 @@ def split_dataset(raw_path, train_path, dev_path, test_path):
     test_errors = test_error_2015 + test_error_2014 + test_error_2013
 
     train_lines = []
-    for i in range(len(train_corrects)):
+    # for i in range(len(train_corrects)):
+    for i in range(64):
         train_lines.append([train_corrects[i], train_errors[i]])
 
     test_lines = []
-    for i in range(len(test_corrects)):
+    # for i in range(len(test_corrects)):
+    for i in range(64):
         test_lines.append([test_corrects[i], test_errors[i]])
     file_utils.write_bunch(train_path, train_lines)
     file_utils.write_bunch(dev_path, test_lines)
@@ -189,11 +191,11 @@ class DatasetProcesser(object):
                 batch_correct_labels[b, word_idx] = correct_token_ids[word_idx]
                 batch_position_ids[b, word_idx] = word_idx
 
-        # if use_cuda:
-        #     batch_inputs = batch_inputs.to(device)
-        #     batch_token_type_inputs = batch_token_type_inputs.to(device)
-        #     batch_detection_labels = batch_detection_labels.to(device)
-        #     batch_correct_labels = batch_correct_labels.to(device)
-        #     batch_position_ids = batch_position_ids.to(device)
+        if use_cuda:
+            batch_inputs = batch_inputs.to(device)
+            batch_token_type_inputs = batch_token_type_inputs.to(device)
+            batch_detection_labels = batch_detection_labels.to(device)
+            batch_correct_labels = batch_correct_labels.to(device)
+            batch_position_ids = batch_position_ids.to(device)
         # print("batch_labels_shape:{}".format(batch_labels.shape))
         return batch_inputs, batch_token_type_inputs, batch_position_ids, batch_detection_labels, batch_correct_labels

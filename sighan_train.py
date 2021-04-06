@@ -1,7 +1,7 @@
 from corpus_preprocess import sighan_preprocess as preprocess
 import cfg
 # from models.text_bert import BertSoftmaxModel
-from models.soft_masked_bert import SoftMaskedBERT
+from models.smb import SoftMaskedBERT
 from models.optimizers import Optimizer
 import torch.nn as nn
 import torch
@@ -94,9 +94,10 @@ def run(mtd="fold_split"):
         if not cfg.RESUME_EPOCH:
             bert_config = BertConfig.from_pretrained(
                 "{}/bert_config.json".format(cfg.bert_path))
-            model = SoftMaskedBERT.from_pretrained(
-                "{}/pytorch_model.bin".format(cfg.bert_path), config=bert_config)
+            # model = SoftMaskedBERT.from_pretrained(
+            #     "{}/pytorch_model.bin".format(cfg.bert_path), config=bert_config)
             # model = SoftMaskedBERT(cfg.bert_path, label_encoder=None)
+            model = SoftMaskedBERT(cfg.bert_path, bert_config)
         else:
             save_folder = os.path.join(cfg.proj_path, "data/models/{}/{}".format(dataset_name, model_name))
             print(' ******* Resume training from --  epoch {} *********'.format(cfg.RESUME_EPOCH))
@@ -105,6 +106,7 @@ def run(mtd="fold_split"):
 
     def _eval(data):
         model.eval()  # 不启用 BatchNormalization 和 Dropout
+        print(model.training)
         # data = dev_data
         y_pred = []
         y_true = []
@@ -171,10 +173,11 @@ def run(mtd="fold_split"):
                 # print(detection_network_output.shape, batch_detection_labels.shape)
                 # print(final_outputs.shape, batch_correct_labels.shape)  # torch.Size([16, 100, 2]) torch.Size([16, 100, 21128])
                 loss = loss_factory.smb_loss(detection_network_output, final_outputs, batch_detection_labels, batch_correct_labels)
+                loss.backward(retain_graph=True)
+
                 loss_value = loss.detach().cpu().item()  # 截断反向传播
                 # losses += loss_value
                 overall_losses += loss_value
-                loss.backward(retain_graph=True)
                 optimizer.step()
                 step += 1
             overall_losses /= batch_num
