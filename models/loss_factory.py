@@ -50,6 +50,6 @@ def smb_loss(detection_output, correct_output, detection_label, correct_label, c
         correct_output.view(correct_output.size(0) * correct_output.size(1), correct_output.size(2)),
         correct_label.view(correct_label.size(0) * correct_label.size(1))
         )
-    # return coefficient*detection_loss + (1-coefficient)*correct_loss
+    return coefficient*detection_loss + (1-coefficient)*correct_loss
     # return detection_loss
-    return correct_loss
+    # return correct_loss

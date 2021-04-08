@@ -26,4 +26,7 @@ sighan_raw:预处理后的数据
 https://github.com/onebula/sighan_raw
 
 
+### models
+Spelling Error Correction with Soft-Masked BERT
+
 todo

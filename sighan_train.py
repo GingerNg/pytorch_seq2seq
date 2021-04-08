@@ -106,11 +106,11 @@ def run(mtd="fold_split"):
 
     def _eval(data):
         model.eval()  # 不启用 BatchNormalization 和 Dropout
-        print(model.training)
-        # data = dev_data
+        # print(model.training)
         y_pred = []
         y_true = []
-        # detection_y_pred = []
+        detection_y_pred = []
+        detection_y_true = []
         with torch.no_grad():
             for batch_data in dataset_processer.data_iter(data, config['test_batch_size'], shuffle=False):
                 torch.cuda.empty_cache()
@@ -120,16 +120,20 @@ def run(mtd="fold_split"):
                                                                 attention_mask=batch_detection_labels,
                                                                 token_type_ids=batch_token_type_inputs,
                                                                 position_ids=batch_position_ids)
-                # detection_output = detection_network_output.view(detection_network_output.size(0) * detection_network_output.size(1), detection_network_output.size(2))
-                # detection_y_pred.extend(torch.max(detection_output, dim=1)
-                #                         [1].cpu().numpy().tolist())
+                # detection
+                detection_output = detection_network_output.view(detection_network_output.size(0) * detection_network_output.size(1), detection_network_output.size(2))
+                detection_y_pred.extend(torch.max(detection_output, dim=1)[1].cpu().numpy().tolist())
+                detection_labels = batch_detection_labels.view(batch_detection_labels.size(0) * batch_detection_labels.size(1))
+                detection_y_true.extend(detection_labels.cpu().numpy().tolist())
+
+                # correct
                 final_outputs = final_outputs.view(final_outputs.size(0) * final_outputs.size(1), final_outputs.size(2))
                 # batch_outputs = final_outputs.detach().cpu().numpy().tolist()
                 y_pred.extend(torch.max(final_outputs, dim=1)[1].cpu().numpy().tolist())
-
                 correct_labels = batch_correct_labels.view(batch_correct_labels.size(0) * batch_correct_labels.size(1))
                 y_true.extend(correct_labels.cpu().numpy().tolist())
 
+            detection_score, detection_dev_f1 = scores.get_score(detection_y_true, detection_y_pred)
             score, dev_f1 = scores.get_score(y_true, y_pred)
         return score, dev_f1
 
@@ -148,9 +152,10 @@ def run(mtd="fold_split"):
         batch_num = int(np.ceil(len(train_data) / float(config["train_batch_size"])))
         print("batch_num:{}".format(batch_num))
         # optimizer = Optimizer(model.parameters(),steps=batch_num * config["epochs"])  # 优化器
-        lr = 1e-3
-        betas = (0.5, 0.999)
-        optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, betas=betas)
+        # lr = 1e-3
+        # betas = (0.5, 0.999)
+        # optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, betas=betas)
+        optimizer = Optimizer(model.all_parameters, steps=batch_num * config["epochs"])  # 优化器
         best_train_f1, best_dev_f1 = 0, 0
         early_stop = -1
         EarlyStopEpochs = 5  # 当多个epoch，dev的指标都没有提升，则早停

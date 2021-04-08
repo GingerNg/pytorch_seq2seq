@@ -54,13 +54,13 @@ def split_dataset(raw_path, train_path, dev_path, test_path):
     test_errors = test_error_2015 + test_error_2014 + test_error_2013
 
     train_lines = []
-    # for i in range(len(train_corrects)):
-    for i in range(64):
+    for i in range(len(train_corrects)):
+    # for i in range(64):
         train_lines.append([train_corrects[i], train_errors[i]])
 
     test_lines = []
-    # for i in range(len(test_corrects)):
-    for i in range(64):
+    for i in range(len(test_corrects)):
+    # for i in range(64):
         test_lines.append([test_corrects[i], test_errors[i]])
     file_utils.write_bunch(train_path, train_lines)
     file_utils.write_bunch(dev_path, test_lines)
@@ -139,9 +139,8 @@ class DatasetProcesser(object):
         def _batch_slice(data, batch_size):
             batch_num = int(np.ceil(len(data) / float(batch_size)))  # ceil 向上取整
             for i in range(batch_num):
-                cur_batch_size = batch_size if i < batch_num - \
-                    1 else len(data) - batch_size * i
-                docs = [data[i * batch_size + b] for b in range(cur_batch_size)]  # ???
+                cur_batch_size = batch_size if i < batch_num - 1 else len(data) - batch_size * i
+                docs = [data[i * batch_size + b] for b in range(cur_batch_size)]  #
                 yield docs  # 　返回一个batch的数据
 
         batched_data = []

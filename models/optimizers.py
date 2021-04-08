@@ -14,6 +14,7 @@ class Optimizer:
         self.optims = []
         self.schedulers = []
 
+        # 不同的部分采用不同的优化器
         for name, parameters in model_parameters.items():
             if name.startswith("basic"):
                 optim = torch.optim.Adam(parameters, lr=learning_rate)  # 优化器

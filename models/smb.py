@@ -109,8 +109,32 @@ class SoftMaskedBERT(nn.Module):
 
         self.soft_masked_bert_dense_out = torch.nn.Linear(self.config.hidden_size,
                                                           self.bert_model.embeddings.word_embeddings.weight.shape[0])
+        self.all_parameters = {}
+        # basic parameters
+        parameters = []
+        parameters.extend(
+            list(filter(lambda p: p.requires_grad, self.detection_network.parameters())))
+        parameters.extend(
+            list(filter(lambda p: p.requires_grad, self.soft_masked_bert_dense_out.parameters())))
+        if len(parameters) > 0:
+            self.all_parameters["basic_parameters"] = parameters
+
+        # bert parameters
+        # bert_parameters = self.get_bert_parameters()
+        # self.all_parameters["bert_parameters"] = bert_parameters
+
         if use_cuda:
             self.to(device)
+
+    def get_bert_parameters(self):
+        no_decay = ['bias', 'LayerNorm.weight']
+        optimizer_parameters = [
+            {'params': [p for n, p in self.bert_model.named_parameters() if not any(nd in n for nd in no_decay)],
+             'weight_decay': 0.01},
+            {'params': [p for n, p in self.bert_model.named_parameters() if any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0}
+        ]
+        return optimizer_parameters
 
     def get_attention_coef(self, soft_masking_coefs, attention_mask):
         if self.training:  # model.train()
@@ -182,17 +206,12 @@ class SoftMaskedBERT(nn.Module):
         permuted_input_embeddings = input_embeddings.permute(1, 0, 2)
 
         # DetectionNetwork
-        detection_network_output, soft_masking_coefs = self.detection_network(
-            permuted_input_embeddings)
+        detection_network_output, soft_masking_coefs = self.detection_network(permuted_input_embeddings)
 
         # soft_mask
         soft_masked_embeddings = self.soft_mask(input_embeddings, soft_masking_coefs, attention_mask)
 
         # print(soft_masked_embeddings.device)
-
-        # todo
-        # soft_masked_embeddings = input_embeddings
-
         # bert_encode
         bert_output_final_hidden_layer = self.bert_model.encode(soft_masked_embeddings,
                                                                 extended_attention_mask,
